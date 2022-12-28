@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.starshop.board.mapper.BoardMapper">
+
+	<!-- 리스트 -->
+	<select id="list" resultType="com.starshop.board.vo.BoardVO">
+		<!-- CDATA - mybatis에서 Oracle DB 처리문을 해석해서 되는 확인 처리 - 해석이 안되는 것도 오라클로 그대로 넘겨주세요~ 의 의미 -->
+		<![CDATA[
+		select no, title, writer, writeDate, hit 
+		from (
+			select /*+ INDEX_DESC(board SYS_C007010) */ 
+				rownum rno, no, title, writer, writeDate, hit 
+			from board 
+			where rownum <= #{endRow}
+		)
+		where rno > #{startRow} -1
+		]]>
+	</select>
+
+	<!-- 데이터 총 개수 -->
+	<select id="getTotalRow" resultType="Long">
+		select count(no) from board
+	</select>
+	
+	<!-- 글 보기 -->
+	<select id="view" resultType="com.starshop.board.vo.BoardVO">
+		select no, title, content, writer, writeDate, hit 
+		from board 
+		where no = #{no}
+	</select>
+	
+	<!-- 조회수 1 증가 -->
+	<update id="increase">
+		update board 
+		set hit = hit + 1 
+		where no = #{no}
+	</update>
+	
+	<!-- 글 등록 -->
+	<insert id="write">
+		insert into board(no, title, content, writer) 
+		value(board_seq.nextval, #{title}, #{content}, #{writer})
+	</insert>
+	
+	<!-- 글 수정 -->
+	<update id="update">
+		update board 
+		set title = #{title}, 
+			content = #{content},
+			writer = #{writer} 
+		where no = #{no}
+	</update>
+	
+	<!-- 글 삭제 -->
+	<delete id="delete">
+		delete from board 
+		where no = #{no}
+	</delete>
+	
+</mapper>
